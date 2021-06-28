@@ -1,0 +1,72 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```
+```{r}
+library(tidyverse)
+library(randomForest)
+library(randomForestExplainer)
+library(tidymodels)
+library(mice)
+```
+
+```{r}
+ames_competition_csv = ames_competition_csv %>% mutate(ID = as_factor(ID)) %>%
+  mutate(MS_Zoning = as_factor(MS_Zoning)) %>%
+  mutate(Lot_Area = as_factor(Lot_Area)) %>%
+  mutate(Lot_Shape = as_factor(Lot_Shape)) %>%
+  mutate(Neighborhood = as_factor(Neighborhood)) %>%
+  mutate(Bldg_Type = as_factor(Bldg_Type)) %>%
+  mutate(House_Style = as_factor(House_Style)) %>%
+  mutate(Overall_Qual = as_factor(Overall_Qual)) %>%
+  mutate(Overall_Cond = as_factor(Overall_Cond)) %>%
+  mutate(Year_Built = as_factor(Year_Built)) %>%
+  mutate(Year_Remod_Add = as_factor(Year_Remod_Add)) %>%
+  mutate(Sale_Condition = as_factor(Sale_Condition)) %>%
+  mutate(Sale_Type = as_factor(Sale_Type))
+```
+
+
+```{r}
+library(readxl)
+ames_student <- read_excel("C:/Users/Breydan Gorham/Downloads/ames_student.xlsx")
+library(readxl)
+ames_competition_csv <- read_excel("C:/Users/Breydan Gorham/Downloads/ames_competition.xlsx")
+competition = ames_competition
+x = rep("yes", times= 428)
+Predictions =data.frame(x)
+
+set.seed(1234)
+imp_age = mice(ames_competition_csv, m=5, method='pmm', printFlag=FALSE)
+
+ames_competition_csv_complete = complete(imp_age)
+summary(ames_competition_csv_complete)
+
+ames_competition_recipe = recipe(ID ~ Sale_Type, ames_competition_csv_complete ) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+
+rf_model = rand_forest() %>%
+  set_engine("ranger") %>%
+  set_mode("classification")
+
+ames_competition_csv_wflow =
+  workflow() %>%
+  add_model(rf_model) %>%
+  add_recipe(ames_competition_recipe)
+```
+
+```{r}
+ggplot(ames_student1, aes(x= MS_Zoning, y= Neighborhood)) +
+  geom_point()
+
+ggplot(ames_student1, aes(x= Lot_Shape, y= Lot_Area)) +
+  geom_point()
+
+ggplot(ames_student1, aes(x= Overall_Cond, y= Year_Built)) +
+  geom_point()
+
+```
+
